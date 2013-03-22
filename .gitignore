@@ -8,3 +8,4 @@ datagen.egg-info/
 .project
 .pydevproject
 devrunner.py
+test-runner.py
