@@ -6,14 +6,32 @@
             {
                 "name": "name",
                 "type": "words",
-                "size": 100,
+                "size": 1,
                 "generator": "names"
+            },
+            {
+            	"name": "telephone",
+            	"type": "us-telno",
+            	"size": 2,
+            	"generator": "numbers"
+            },
+            {
+            	"name": "ssn",
+            	"type": "us-ssn",
+            	"size": 1,
+            	"generator": "numbers"
+            },
+            {
+            	"name": "number",
+            	"size": 20,
+            	"generator": "numbers"
             }
+            
         ]
     },
     {
         "collection_name": "stories",
-        "count": 50000,
+        "count": 1,
         "fields": [
             {
                 "name": "title",
@@ -28,7 +46,7 @@
             {
                 "name": "body",
                 "type": "body",
-                "size": [400,600],
+                "size": [40,60],
                 "generator": "lipsum"
             },
             {

@@ -29,9 +29,10 @@ class Generator(object):
         self.pbar     = pbar
         self.options.update(options)
         
-        self.dbs["words"]  = options["words"]
-        self.dbs["names"]  = options["names"]
-        self.dbs["lipsum"] = options["lipsum"]
+        self.dbs["words"]   = options["words"]
+        self.dbs["names"]   = options["names"]
+        self.dbs["lipsum"]  = options["lipsum"]
+        self.dbs["numbers"] = options["numbers"]
 
     def run(self):
         '''
@@ -54,7 +55,8 @@ class Generator(object):
         :param count:
         :param fields:
         '''
-        print("\n>>> Building '%s' collection, %d documents to build." % (name, count))
+        print("\n>>> Building '%s' collection, %d documents to build." % 
+              (name, count))
         self.ids[name] = []
 
         # Configure a progress indicator.
@@ -94,14 +96,24 @@ class Generator(object):
                     # Split out the related collection name
                     ref_coll = field["type"].split(":")[1]
                     
-                    # If we don't have any ids with that collection name, it's possible
-                    # the user input a bad name, or tried to refer to a collection before
-                    # defining it. Raise an exception.
+                    # If we don't have any ids with that collection name, it's
+                    # possible the user input a bad name, or tried to refer to 
+                    # a collection before defining it. Raise an exception.
                     if ref_coll not in self.ids:
-                        raise Exception("Field with name '%s' requests reference to collection '%s' which does not exist. Make sure that any collection referred to is defined before the request." % (field["name"], ref_coll))
+                        raise Exception("Field with name '%s' requests \
+                                         reference to collection '%s' which \
+                                         does not exist. Make sure that any \
+                                         collection referred to is defined \
+                                         before the request." % (field["name"], 
+                                                                 ref_coll))
+                        
 
-                    # Otherwise, pick a random id from the list and build a reference.
-                    document[field["name"]] = DBRef(ref_coll, random.choice(self.ids[ref_coll]), self.dbname) 
+                    # Otherwise, pick a random id from the list and build a 
+                    # reference.
+                    document[field["name"]] = DBRef(ref_coll, 
+                                                    random.choice(
+                                                          self.ids[ref_coll]), 
+                                                    self.dbname) 
 
             
             # If a gen is specified, we'll call it to get our data.
@@ -109,7 +121,8 @@ class Generator(object):
                 try:
                     gen = self.dbs[field["generator"]]
                 except KeyError:
-                    raise Exception("Invalid generator '%s' specified" % field["gen"])
+                    raise Exception("Invalid generator '%s' specified" %  
+                                    field["generator"])
                 else:
                     data = gen.generate_data(
                         size=(field.get("size", 0)), 
@@ -132,7 +145,8 @@ class Generator(object):
             # convert paragraph breaks
             data = re.sub("\n\n", "<\p>", data)
             data = re.sub("\t+", "<p>", data)
-            return cgi.escape(data).encode('utf-8', 'xmlcharrefreplace').decode("ascii")
+            return cgi.escape(data).encode('utf-8', 
+                                           'xmlcharrefreplace').decode("ascii")
         elif self.options["encoding"] == "base64":
             return base64.b64encode(data.encode("ascii")).decode("ascii")
         elif self.options["encoding"] == "ascii":
@@ -146,6 +160,10 @@ class Generator(object):
         :param field:
         :param data:
         '''
+        
+        if field.get("generator", None) == "numbers":
+            return data 
+        
         if "type" not in field:
             return " ".join(data)
 

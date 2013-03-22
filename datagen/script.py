@@ -17,34 +17,45 @@ from datagen import generator
 
 __author__  = "Samantha Quinones"
 __email__   = "squinones@politico.com"
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 __status__  = "Development"
-__sample__  = os.path.abspath(os.path.join(os.path.dirname(__file__),"../templates/template.json"))
+__sample__  = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           "../templates/template.json"))
 
 def parse_args():
     '''
     Set up cmdline argument parser. 
     '''
-    parser = argparse.ArgumentParser(description="Generate dummy data in a mongo collection.")
-    parser.add_argument("-n", "--no-progress", action="store_true", default=False,
-                        help="Do not display progress.")
-    parser.add_argument("-e", "--encoding", type=str, choices=["html", "base64", "ascii", "utf-8"], default="utf-8",
-                        help="Output encoding.")
-    parser.add_argument("-t", "--test-output", action="store_true", default=False,
-                        help="Do not write to database. Instead, parse template and display output to stdout.")
+    parser = argparse.ArgumentParser(description="Generate dummy data in a \
+                                                  mongo collection.")
+    parser.add_argument("-n", "--no-progress", action="store_true", 
+                        default=False, help="Do not display progress.")
+    parser.add_argument("-e", "--encoding", type=str, choices=["html", 
+                                                               "base64",
+                                                               "ascii", 
+                                                               "utf-8"], 
+                        default="utf-8", help="Output encoding.")
+    parser.add_argument("-t", "--test-output", action="store_true", 
+                        default=False,
+                        help="Do not write to database. Instead, parse template\
+                              and display output to stdout.")
     parser.add_argument("--hostname", type=str, default="localhost",
-                        help="Hostname with a MongoDB instance. Default: localhost")
+                        help="Hostname with a MongoDB instance. Default: \
+                              localhost")
     parser.add_argument("--port", type=int, default=27017,
-                        help="Post hosting the MongoDB instance. Default: 27017")
+                        help="Post hosting the MongoDB instance. Default: \
+                              27017")
     parser.add_argument("-d", "--dbname", type=str, default="datagen",
                         help="Database name to use. Default: datagen")
-    parser.add_argument("-p", "--preserve-database", action="store_true", default=False,
-                        help="Do NOT overwrite existing databases (appends new records)")
+    parser.add_argument("-p", "--preserve-database", action="store_true", 
+                        default=False, help="Do NOT overwrite existing \
+                                             databases (appends new records)")
     parser.add_argument("--create-sample", action="store_true", default=False,
                         help="Write a sample template file to stdout and exit.")
     parser.add_argument("template", nargs="?",
                         type=argparse.FileType('r'),
-                        help="A file containing a JSON template to generate documents.")
+                        help="A file containing a JSON template to generate \
+                        documents.")
     return parser.parse_args()
 
 
@@ -53,12 +64,6 @@ def load_template(template_file):
     Attempts to open a JSON template file and load it in to a dictionary
     '''
     
-    # Get an open file handle
-#    try:
-#        fp = open(template_file, "r")
-#    except:
-#        raise Exception("JSON template file '%s' does not exist or could not be opened." % template_file)
-
     # Attempt to read and parse the file
     try:
         template = json.load(template_file)
@@ -135,9 +140,10 @@ def main(args):
         "use_pbar": not args.no_progress,
         "encoding": args.encoding,
         "preserve_database": args.preserve_database,
-        "names":  dictionaries.NamesDictionary(),
-        "words":  dictionaries.WordsDictionary(),
-        "lipsum": dictionaries.LipsumDictionary(),
+        "names"  : dictionaries.NamesDictionary(),
+        "words"  : dictionaries.WordsDictionary(),
+        "lipsum" : dictionaries.LipsumDictionary(),
+        "numbers": dictionaries.NumbersDictionary()
     }
     gen = generator.Generator(template, output, create_pbar, **gen_config)
 
@@ -147,9 +153,13 @@ def main(args):
     
     gen.run()
     
-    print("\nData generation complete in %f seconds" % (float(time.time()) - float(s_time)))
+    print("\nData generation complete in %f seconds" % 
+          (float(time.time()) - float(s_time)))
 
 def start():
+    '''
+    Start execution
+    '''
     try:
         main(parse_args())
     except KeyboardInterrupt:

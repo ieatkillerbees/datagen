@@ -40,7 +40,8 @@ class Dictionary(object):
     def generate_data(self, size=0, **options):
         '''
         Generates a collection of random data. 
-        :param size:            Amount of data to return, depending on class context. Can be an int or range.
+        :param size:            Amount of data to return, depending on class 
+                                context. Can be an int or range.
         '''
         # Calculate the size. If a sequence, take the first two elements as 
         # the lower and upper bounds of a range, and select a random element
@@ -54,14 +55,15 @@ class Dictionary(object):
                 raise
             
         # Generate a list of random selections from the the word list.
-        return [random.choice(self.words) for x in range(size)]         #@UnusedVariable
+        return [random.choice(self.words) for x in range(size)]
         
         
 class NamesDictionary(Dictionary):
     '''
     Dictionary to generate random names.
     '''
-    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),"data/randomNames.csv"))
+    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            "data/randomNames.csv"))
 
     def load(self):
         '''
@@ -82,7 +84,8 @@ class NamesDictionary(Dictionary):
                     entry["full_name"] = line[3]
                     words.append(entry)
         except Exception as exc:
-            raise Exception("Names dictionary file '%s' does not exist or could not be opened: %s" % (self.datafile, str(exc)))
+            raise Exception("Names dictionary file '%s' does not exist or could\
+                             not be opened: %s" % (self.datafile, str(exc)))
         else:
             return words
 
@@ -102,11 +105,12 @@ class NamesDictionary(Dictionary):
                 raise
             
         # Generate a list of random selections from the the word list.
-        data     = [random.choice(self.words) for x in range(size)]     #@UnusedVariable
+        data     = [random.choice(self.words) for x in range(size)]
         
         subfield = options.get("subfield", "full_name")
         
-        if subfield not in ["first_name", "last_name", "middle_init", "full_name"]:
+        if subfield not in ["first_name", "last_name", 
+                            "middle_init", "full_name"]:
             raise Exception("Invalid subfield specified.")
         
         return [name.get(subfield, " ") for name in data]
@@ -115,7 +119,8 @@ class WordsDictionary(Dictionary):
     '''
     Dictionary of English words
     '''
-    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),"data/en-words.txt"))
+    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            "data/en-words.txt"))
 
     def load(self):
         '''
@@ -129,7 +134,8 @@ class WordsDictionary(Dictionary):
                         continue
                     words.append(word.strip())
         except Exception as exc:
-            raise Exception("Words dictionary file '%s' does not exist or could not be opened: %s" % (self.datafile, str(exc)))
+            raise Exception("Words dictionary file '%s' does not exist or could\
+                             not be opened: %s" % (self.datafile, str(exc)))
         else:
             return words
 
@@ -137,7 +143,8 @@ class LipsumDictionary(Dictionary):
     '''
     Dictionary of lorem ipsum words.
     '''
-    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),"data/lorem.txt"))
+    datafile = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                            "data/lorem.txt"))
 
     def load(self):
         '''
@@ -149,6 +156,61 @@ class LipsumDictionary(Dictionary):
                 text = fp.read().replace("\n", " ")
                 words = text.split(" ")
         except Exception as exc:
-            raise Exception("Lipsum dictionary file '%s' does not exist or could not be opened: %s" % (self.datafile, str(exc)))
+            raise Exception("Lipsum dictionary file '%s' does not exist or\
+                             could not be opened: %s" % (self.datafile, 
+                                                         str(exc)))
         else:
             return words
+        
+class NumbersDictionary(Dictionary):
+    '''
+    Dictionary for generating pseudorandom numbers
+    '''
+    
+    types = {
+         "us-telno": ((3,3,4), "+1({0}){1}-{2}"),
+         "us-ssn":   ((3,2,4), "{0}-{1}-{2}")
+    }
+    
+    def load(self):
+        '''
+        Does nothing
+        '''
+        return 
+        
+    def generate_data(self, size=0, **options):
+        '''
+        Generates a random number 
+        :param size:            Amount of data to return, depending on class
+        context. Can be an int or range.
+        '''
+        # Calculate the size. If a sequence, take the first two elements as 
+        # the lower and upper bounds of a range, and select a random element
+        # therein.
+        try:
+            size = int(random.randrange(size[0], size[1]))
+        except TypeError:
+            try: 
+                size = int(size)
+            except TypeError:
+                raise
+            
+        if options["field_type"] not in self.types:
+            transform = None
+        else:
+            transform = self.types[options["field_type"]]
+            
+        if not transform:
+            return "".join([str(random.randrange(1, 9)) for x in range(size)])
+        
+        numbers    = []
+        numstrings = []
+        for number in range(size):
+            for count in transform[0]:
+                numbers.append("".join([str(random.randrange(1, 9)) for x in
+                                         range(count)]))
+            numstrings.append(transform[1].format(*numbers))
+        if len(numstrings) == 1:
+            return str(numstrings[0])
+        else:
+            return numstrings
