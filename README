@@ -27,6 +27,7 @@ optional arguments:
   -p, --preserve-database
                         Do NOT overwrite existing databases (appends new
                         records)
+  --create-sample       Write a sample template file to stdout and exit.
 
 ----------------------------
 Templates

@@ -5,7 +5,7 @@ import distribute_setup
 distribute_setup.use_setuptools()
 
 setup(name = "datagen",
-      version = "0.9",
+      version = "0.9.0",
       description = "Random Data Generator",
       author = "Samantha Quinones",
       author_email = "squinones@politico.com",

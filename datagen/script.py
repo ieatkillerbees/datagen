@@ -17,7 +17,7 @@ from datagen import generator
 
 __author__  = "Samantha Quinones"
 __email__   = "squinones@politico.com"
-__version__ = "0.9"
+__version__ = "0.9.0"
 __status__  = "Development"
 __sample__  = os.path.abspath(os.path.join(os.path.dirname(__file__),"../templates/template.json"))
 
