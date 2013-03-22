@@ -10,7 +10,6 @@ import progressbar
 import pymongo
 import sys
 import time
-import signal
 
 from datagen.output_methods import MongoInterface, StdoutInterface
 from datagen import dictionaries
@@ -20,6 +19,7 @@ __author__  = "Samantha Quinones"
 __email__   = "squinones@politico.com"
 __version__ = "0.9"
 __status__  = "Development"
+__sample__  = os.path.abspath(os.path.join(os.path.dirname(__file__),"../templates/template.json"))
 
 def parse_args():
     '''
@@ -36,11 +36,14 @@ def parse_args():
                         help="Hostname with a MongoDB instance. Default: localhost")
     parser.add_argument("--port", type=int, default=27017,
                         help="Post hosting the MongoDB instance. Default: 27017")
-    parser.add_argument("-d", "--dbname", required=True, type=str, default="datagen",
+    parser.add_argument("-d", "--dbname", type=str, default="datagen",
                         help="Database name to use. Default: datagen")
     parser.add_argument("-p", "--preserve-database", action="store_true", default=False,
                         help="Do NOT overwrite existing databases (appends new records)")
-    parser.add_argument("template", type=str, nargs=1,
+    parser.add_argument("--create-sample", action="store_true", default=False,
+                        help="Write a sample template file to stdout and exit.")
+    parser.add_argument("template", nargs="?",
+                        type=argparse.FileType('r'),
                         help="A file containing a JSON template to generate documents.")
     return parser.parse_args()
 
@@ -51,14 +54,14 @@ def load_template(template_file):
     '''
     
     # Get an open file handle
-    try:
-        fp = open(template_file, "r")
-    except:
-        raise Exception("JSON template file '%s' does not exist or could not be opened." % template_file)
+#    try:
+#        fp = open(template_file, "r")
+#    except:
+#        raise Exception("JSON template file '%s' does not exist or could not be opened." % template_file)
 
     # Attempt to read and parse the file
     try:
-        template = json.load(fp)
+        template = json.load(template_file)
     except Exception as exc:
         raise Exception("JSON template could not be parsed: %s" % str(exc))
 
@@ -92,16 +95,34 @@ def load_mongo(hostname, port, dbname):
     else: 
         return MongoInterface(client, dbname)
 
+def print_sample_template():
+    '''
+    Print the contents of template.json to stdout
+    '''
+    try:
+        with open(__sample__, "r") as fp:
+            print(fp.read())
+    except OSError:
+        raise Exception("Failed to open sample template!")
+    
 def main(args):
     '''
     Main method. Generate dependencies for the generator and initiate the run.
     :param args:
     '''
+    
+    if args.create_sample:
+        print_sample_template()
+        return
+    
+    if not args.template:
+        raise Exception("You must supply a template file.")
+    
     print("datagen.py - Version %s\n" % __version__)
     
     sys.stdout.write("* Loading template...")
     sys.stdout.flush()
-    template = load_template(args.template[0])
+    template = load_template(args.template)
     sys.stdout.write("done!\n")
     sys.stdout.flush()
     
@@ -137,7 +158,6 @@ def start():
         sys.exit(0)
     except Exception as exc:
         print(str(exc))
-        raise
         sys.exit(-1)
     else:
         sys.exit(0)
