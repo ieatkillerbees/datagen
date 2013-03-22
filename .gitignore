@@ -1,0 +1,9 @@
+*.class
+*.pyc
+*.pyo
+*.swp
+dist/
+build/
+datagen.egg-info/
+.project
+.pydevproject

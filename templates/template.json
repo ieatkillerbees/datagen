@@ -1,0 +1,42 @@
+[
+    {
+        "collection_name": "authors",
+        "count": 2,
+        "fields": [
+            {
+                "name": "name",
+                "type": "words",
+                "size": 100,
+                "generator": "names"
+            }
+        ]
+    },
+    {
+        "collection_name": "stories",
+        "count": 50000,
+        "fields": [
+            {
+                "name": "title",
+                "type": "headline",
+                "size": [6,10],
+                "generator": "lipsum"
+            },
+            {
+                "name": "author",
+                "type": "ref:authors"
+            },
+            {
+                "name": "body",
+                "type": "body",
+                "size": [400,600],
+                "generator": "lipsum"
+            },
+            {
+                "name": "tags",
+                "type": "list",
+                "size": [3,5],
+                "generator": "words"
+            }
+        ]
+    }
+]

@@ -1,0 +1,143 @@
+datagen.py - Random data generator for MongoDB
+
+----------------------------
+Usage
+----------------------------
+usage: datagen.py [-h] [-n] [-e {html,base64,ascii,utf-8}] [-t]
+                  [--hostname HOSTNAME] [--port PORT] -d DBNAME [-v] [-p]
+                  template
+
+Generate dummy data in a mongo collection.
+
+positional arguments:
+  template              A file containing a JSON template to generate
+                        documents.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n, --no-progress     Do not display progress.
+  -e {html,base64,ascii,utf-8}, --encoding {html,base64,ascii,utf-8}
+                        Output encoding.
+  -t, --test-output     Do not write to database. Instead, parse template and
+                        display output to stdout.
+  --hostname HOSTNAME   Hostname with a MongoDB instance. Default: localhost
+  --port PORT           Post hosting the MongoDB instance. Default: 27017
+  -d DBNAME, --dbname DBNAME
+                        Database name to use. Default: datagen
+  -p, --preserve-database
+                        Do NOT overwrite existing databases (appends new
+                        records)
+
+----------------------------
+Templates
+----------------------------
+
+1.1 Introduction 
+----------------
+Template files are valid JSON lists containing descriptions of the data that 
+you want to generate. The lists are processed in order, so collections MUST 
+be described BEFORE any collections that refer back to them.
+
+1.2 Object Format
+-----------------
+{
+	"collection_name": "Name of the collection to generate documents for",
+	"count"			 : Number of documents to generate
+	"fields"		 : List of fields that each document should contain.
+}
+
+1.3 Field Format
+----------------
+Field Format:
+{
+	"name"	   : Field's key
+	"type"	   : Valid field type (see 1.4)
+	"grammar"  : Valid grammar keyword (see 1.5) 
+	"size"     : Size of the dat to generate. This is a contextual keyword, and
+		         may be handled differently depending on the field type. Refer 
+		         to section 1.4 for details. Sizes can be specified as either
+		         an integer value, or as a range as [<lower>, <upper>].
+	"generator": The type of generator to use for the field. (see 1.5)
+	"generator_opts":  Optional JSON object containing generator options. 
+					   (see 1.5)
+}
+
+1.4 Field Types
+---------------
+"sentence"	- Words will have realistic punctuation and capitalization.
+"body"		- Same as "sentence," but the output will be grouped in to 
+			  paragraphs.
+"headline"	- Each word in the output will have its first letter 
+			  capitalized.
+"words" 	- Space separated with no punctuation and potentially random 
+			  capitalization. Size sets the number of words to generate.
+"list"		- A valid J/BSON list object. Size sets the number of elements
+			  the list will contain.
+
+Field type can also contain references to other collections in the form of
+"ref:<other_collection>"
+
+
+1.5 Generators
+--------------
+"words"		- Generate from a pool of valid English words. Useful for
+			  prototyping searches. 
+"lipsum"	- Similar to the words generator, but uses Lorem Ipsum textl
+"names"		- Generates names from a collection of 10,000 common US 
+			  given and surnames. When specifying the names generator, 
+			  you can use the optional "generator_options" to specify
+			  a subfield.
+			  
+			  Valid subfields:
+			  	"first_name"	(ex: John)
+			  	"last_name"		(ex: Smith)
+			  	"middle_init"	(ex: Q)
+			  	"full_name"		(ex: John Q. Smith)
+
+1.6 Sample Template
+-------------------
+[
+    {
+        "collection_name": "authors",
+        "count": 100,
+        "fields": [
+            {
+                "name": "name",
+                "type": "words",
+                "size": 1,
+                "generator": "names"
+                "generator_options": { "subfield": "full_name" }
+            }
+        ]
+    },
+    {
+        "collection_name": "stories",
+        "count": 1000,
+        "fields": [
+            {
+                "name": "title",
+                "type": "words",
+                "grammar": "headline"
+                "size": [6,10],
+                "generator": "lipsum"
+            },
+            {
+                "name": "author",
+                "type": "ref:authors"
+            },
+            {
+                "name": "body",
+                "type": "words",
+                "grammar": "body",
+                "size": [400,600],
+                "generator": "lipsum"
+            },
+            {
+                "name": "tags",
+                "type": "list",
+                "size": [3,5],
+                "generator": "words"
+            }
+        ]
+    }
+]
