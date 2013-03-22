@@ -3,9 +3,10 @@ datagen.py - Random data generator for MongoDB
 ----------------------------
 Usage
 ----------------------------
-usage: datagen.py [-h] [-n] [-e {html,base64,ascii,utf-8}] [-t]
-                  [--hostname HOSTNAME] [--port PORT] -d DBNAME [-v] [-p]
-                  template
+usage: test-runner.py [-h] [-n] [-e {html,base64,ascii,utf-8}] [-t]
+                      [--hostname HOSTNAME] [--port PORT] [-d DBNAME] [-p]
+                      [--create-sample]
+                      [template]
 
 Generate dummy data in a mongo collection.
 
@@ -28,6 +29,7 @@ optional arguments:
                         Do NOT overwrite existing databases (appends new
                         records)
   --create-sample       Write a sample template file to stdout and exit.
+
 
 ----------------------------
 Templates
@@ -78,6 +80,7 @@ Field Format:
 Field type can also contain references to other collections in the form of
 "ref:<other_collection>"
 
+Field types for the number generator are different. See 1.5.1 for details.
 
 1.5 Generators
 --------------
@@ -94,6 +97,20 @@ Field type can also contain references to other collections in the form of
 			  	"last_name"		(ex: Smith)
 			  	"middle_init"	(ex: Q)
 			  	"full_name"		(ex: John Q. Smith)
+"numbers"	- Generates formatted and unformatted number strings.
+			  	
+1.5.1 Number Generation
+-----------------------
+When specifying the numbers generator, there are a number of special types that
+can modify the format of the resulting data. When a type is specified, the size
+parameter indicates the number of data elements to generate. If more than 1,
+the data will be returned as a list.
+
+"us-telno"	- A US/NANP formatted telephone number [+1(ddd)ddd-dddd]
+"us-ssn"	- A US social security number [ddd-dd-dddd]
+
+Number fields that do not specify a type will return a number `size` digits in
+length.
 
 1.6 Sample Template
 -------------------
@@ -108,6 +125,23 @@ Field type can also contain references to other collections in the form of
                 "size": 1,
                 "generator": "names"
                 "generator_options": { "subfield": "full_name" }
+            },
+            {
+            	"name": "telephone",
+            	"type": "us-telno",
+            	"size": 2,
+            	"generator": "numbers"
+            },
+            {
+            	"name": "ssn",
+            	"type": "us-ssn",
+            	"size": 1,
+            	"generator": "numbers"
+            },
+            {
+            	"name": "number",
+            	"size": 20,
+            	"generator": "numbers"
             }
         ]
     },
